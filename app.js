@@ -4,7 +4,11 @@ let btn= document.querySelector("button");
 let fromCur = document.querySelector(".from select");
 let toCur = document.querySelector(".to select");
 let msg = document.querySelector(".msg")
+let amountInput = document.getElementById('amountInput')
 
+amountInput.addEventListener('input', () => {
+  btn.click()
+})
 
 for (let select of dropdowns){
   for (currCode in countryList) {
@@ -30,6 +34,7 @@ const updateFlag = (element) => {
   let newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
   let img = element.parentElement.querySelector("img");
   img.src = newSrc;
+  btn.click()
 };
 
 btn.addEventListener("click",async (evt) => {
@@ -47,6 +52,10 @@ btn.addEventListener("click",async (evt) => {
   
   let finalAmount = amt * rate;
   msg.innerText = `${amt} ${fromCur.value} = ${finalAmount} ${toCur.value}`;
+})
+
+addEventListener('load', () => {
+  btn.click()
 })
 
 
