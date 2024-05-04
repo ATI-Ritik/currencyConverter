@@ -1,16 +1,16 @@
-const BASE_URL = "https://v6.exchangerate-api.com/v6/fdd54ba3f762b1b691b286b7/pair";
-let dropdowns = document.querySelectorAll(".drop-down select")
-let btn= document.querySelector("button");
+const BASE_URL =
+  "https://v6.exchangerate-api.com/v6/fdd54ba3f762b1b691b286b7/pair";
+let dropdowns = document.querySelectorAll(".drop-down select");
+let btn = document.querySelector("button");
 let fromCur = document.querySelector(".from select");
 let toCur = document.querySelector(".to select");
-let msg = document.querySelector(".msg")
-let amountInput = document.getElementById('amountInput')
+let msg = document.querySelector(".msg");
+let amountInput = document.getElementById("amountInput");
+let currentCurrencyRate = 0;
+let currencyFrom = "USD";
+let currencyTo = "INR";
 
-amountInput.addEventListener('input', () => {
-  btn.click()
-})
-
-for (let select of dropdowns){
+for (let select of dropdowns) {
   for (currCode in countryList) {
     let newOption = document.createElement("option");
     newOption.innerText = currCode;
@@ -27,35 +27,47 @@ for (let select of dropdowns){
   });
 }
 
-
-const updateFlag = (element) => {
+const updateFlag = async (element) => {
   let currCode = element.value;
+
+  if (element.name === "from") {
+    currencyFrom = currCode;
+  } else {
+    currencyTo = currCode;
+  }
+
   let countryCode = countryList[currCode];
   let newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
   let img = element.parentElement.querySelector("img");
   img.src = newSrc;
-  btn.click()
+  await getCurrency();
+  msg.innerText = `${amountInput.value} ${currencyFrom} = ${
+    amountInput.value * currentCurrencyRate
+  } ${currencyTo}`;
 };
 
-btn.addEventListener("click",async (evt) => {
+btn.addEventListener("click", async (evt) => {
   evt.preventDefault();
-  let amount = document.querySelector("form input");
-  let amt = amount.value;
-  if(amt===""|| amt<1) {
+  let amt = amountInput.value;
+  if (amt === "" || amt < 1) {
     amt = 1;
-    amount.value = 1;
+    amountInput.value = 1;
   }
-  const URL = `${BASE_URL}/${fromCur.value}/${toCur.value}`;
+
+  let finalAmount = amt * currentCurrencyRate;
+  msg.innerText = `${amt} ${currencyFrom} = ${finalAmount} ${currencyTo}`;
+});
+
+window.addEventListener("load", async () => {
+  await getCurrency();
+  msg.innerText = `${amountInput.value} ${currencyFrom} = ${
+    amountInput.value * currentCurrencyRate
+  } ${currencyTo}`;
+});
+
+const getCurrency = async () => {
+  const URL = `${BASE_URL}/${currencyFrom}/${currencyTo}`;
   let response = await fetch(URL);
   let data = await response.json();
-  let rate = data.conversion_rate;
-  
-  let finalAmount = amt * rate;
-  msg.innerText = `${amt} ${fromCur.value} = ${finalAmount} ${toCur.value}`;
-})
-
-addEventListener('load', () => {
-  btn.click()
-})
-
-
+  currentCurrencyRate = data.conversion_rate;
+};
